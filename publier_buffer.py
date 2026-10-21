@@ -50,9 +50,9 @@ def lire_textes(chemin):
     """Lit un fichier au format de smooth-pret-a-poster (Titre YouTube :, Légende :, Hashtags :, Commentaire à épingler :)."""
     champs = {}
     for ligne in pathlib.Path(chemin).read_text(encoding="utf-8").splitlines():
-        m = re.match(r"\s*(Titre YouTube|Légende|Hashtags|Commentaire à épingler)\s*:\s*(.+)", ligne, re.I)
+        m = re.match(r"\s*(Titre YouTube|Titre|Légende|Hashtags|Commentaire à épingler)\s*:\s*(.+)", ligne, re.I)
         if m:
-            noms = {"titre youtube": "Titre YouTube", "légende": "Légende", "hashtags": "Hashtags",
+            noms = {"titre youtube": "Titre YouTube", "titre": "Titre YouTube", "légende": "Légende", "hashtags": "Hashtags",
                     "commentaire à épingler": "Commentaire à épingler"}
             champs[noms[m.group(1).lower()]] = m.group(2).strip()
     return {
