@@ -78,8 +78,8 @@ def preparer_video(source, nom):
     if source.stat().st_size <= TAILLE_MAX:
         shutil.copyfile(source, cible)
         return cible
-    # Débit visé pour tenir dans 97 Mio, son compris
-    debit = int(97 * 8 * 1024 * 1024 / duree(source)) - 160_000
+    # Débit visé pour tenir dans 94 Mio (marge de 5 % : le 2 passes déborde), son compris
+    debit = int(94 * 8 * 1024 * 1024 / duree(source)) - 160_000
     if debit < DEBIT_MIN:
         print(f"ATTENTION : {debit // 1000} kbit/s seulement, sous les 12 Mb/s voulus (vidéo trop longue pour GitHub)")
     print(f"Vidéo de {source.stat().st_size / 1e6:.0f} Mo : recompression à {debit // 1000} kbit/s")
