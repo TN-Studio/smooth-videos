@@ -29,7 +29,8 @@ CANAUX = {
     "youtube": "6ad76fd5778b240e2f69c0bb",
     "instagram": "6ad76f88778b240e2f69be36",
 }
-TAILLE_MAX = 95 * 1024 * 1024  # GitHub refuse les fichiers de plus de 100 Mo
+TAILLE_MAX = 99 * 1024 * 1024  # GitHub refuse les fichiers de plus de 100 Mio
+DEBIT_MIN = 12_000_000  # en dessous, la qualité se voit (demande de Titouan)
 CATEGORIE_YOUTUBE = "24"  # Entertainment
 
 
@@ -77,8 +78,10 @@ def preparer_video(source, nom):
     if source.stat().st_size <= TAILLE_MAX:
         shutil.copyfile(source, cible)
         return cible
-    # Débit visé pour tenir dans 90 Mo, son compris
-    debit = int(90 * 8 * 1024 * 1024 / duree(source)) - 160_000
+    # Débit visé pour tenir dans 97 Mio, son compris
+    debit = int(97 * 8 * 1024 * 1024 / duree(source)) - 160_000
+    if debit < DEBIT_MIN:
+        print(f"ATTENTION : {debit // 1000} kbit/s seulement, sous les 12 Mb/s voulus (vidéo trop longue pour GitHub)")
     print(f"Vidéo de {source.stat().st_size / 1e6:.0f} Mo : recompression à {debit // 1000} kbit/s")
     journal = DEPOT / "videos" / "passe"
     commun = ["ffmpeg", "-v", "error", "-y", "-i", str(source), "-c:v", "libx264", "-preset", "slow",
