@@ -26,7 +26,7 @@ URL_RAW = "https://raw.githubusercontent.com/TN-Studio/smooth-videos/main/videos
 CLE = pathlib.Path(r"C:\Users\titou\.secrets\buffer_api_key.txt")
 CANAUX = {
     "tiktok": "6ad77009778b240e2f69c253",
-    "youtube": "6ad76fd5778b240e2f69c0bb",
+    "youtube": "6ad8aa05778b240e2f79ddbc",
     "instagram": "6ad76f88778b240e2f69be36",
 }
 TAILLE_MAX = 99 * 1024 * 1024  # GitHub refuse les fichiers de plus de 100 Mio
