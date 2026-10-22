@@ -12,6 +12,7 @@ Clé : C:\\Users\\titou\\.secrets\\buffer_api_key.txt (jamais affichée, jamais 
 """
 import argparse
 import json
+import os
 import pathlib
 import re
 import shutil
@@ -23,6 +24,7 @@ import urllib.request
 
 DEPOT = pathlib.Path(__file__).resolve().parent
 URL_RAW = "https://raw.githubusercontent.com/TN-Studio/smooth-videos/main/videos/"
+URL_RELEASE = "https://github.com/TN-Studio/smooth-videos/releases/download/videos/"
 CLE = pathlib.Path(r"C:\Users\titou\.secrets\buffer_api_key.txt")
 CANAUX = {
     "tiktok": "6ad77009778b240e2f69c253",
@@ -123,6 +125,14 @@ def attendre_en_ligne(url, taille, essais=30):
     sys.exit(f"La vidéo n'est pas accessible publiquement : {url}")
 
 
+def attendre_en_ligne_release(url, essais=20):
+    for _ in range(essais):
+        if subprocess.run(["curl", "-sfL", "-r", "0-0", "-o", os.devnull, url]).returncode == 0:
+            return
+        time.sleep(5)
+    sys.exit(f"La vidéo de la release n'est pas accessible : {url}")
+
+
 CREER = """
 mutation Creer($input: CreatePostInput!) {
   createPost(input: $input) {
@@ -175,6 +185,8 @@ def main():
     p.add_argument("--reseaux", default="tiktok,instagram,youtube")
     p.add_argument("--publier", action="store_true", help="publie tout de suite au lieu de créer des brouillons")
     p.add_argument("--heure", help="programme à cette heure de Paris, ex. 2026-10-20T21:00")
+    p.add_argument("--release", action="store_true",
+                   help="envoie le fichier d'origine dans la release GitHub, sans recompression (vidéos longues)")
     a = p.parse_args()
     heure = None
     if a.heure:
@@ -194,10 +206,21 @@ def main():
 
     source = pathlib.Path(a.video).resolve()
     nom = re.sub(r"[^a-z0-9_-]+", "-", source.stem.lower()).strip("-") + ".mp4"
-    fichier = preparer_video(source, nom)
-    pousser(fichier)
-    url = URL_RAW + nom
-    attendre_en_ligne(url, fichier.stat().st_size)
+    if a.release:
+        # Pas de limite de 100 Mio : le fichier d'origine part tel quel dans la release « videos »
+        cible = DEPOT / "videos" / "_release" / nom
+        cible.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copyfile(source, cible)
+        subprocess.run(["gh", "release", "upload", "videos", str(cible), "--clobber",
+                        "-R", "TN-Studio/smooth-videos"], check=True)
+        cible.unlink()
+        url = URL_RELEASE + nom
+        attendre_en_ligne_release(url)
+    else:
+        fichier = preparer_video(source, nom)
+        pousser(fichier)
+        url = URL_RAW + nom
+        attendre_en_ligne(url, fichier.stat().st_size)
     print(f"Vidéo en ligne : {url}")
 
     mode = f"programmé {a.heure}" if heure else ("PUBLICATION" if a.publier else "brouillon")
