@@ -182,7 +182,7 @@ def main():
     p.add_argument("--legende")
     p.add_argument("--hashtags")
     p.add_argument("--commentaire")
-    p.add_argument("--reseaux", default="tiktok,instagram,youtube")
+    p.add_argument("--reseaux", default="instagram,youtube")  # TikTok : Titouan publie lui-même
     p.add_argument("--publier", action="store_true", help="publie tout de suite au lieu de créer des brouillons")
     p.add_argument("--heure", help="programme à cette heure de Paris, ex. 2026-10-20T21:00")
     p.add_argument("--release", action="store_true",
